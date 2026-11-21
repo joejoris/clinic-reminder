@@ -2,9 +2,13 @@ from datetime import datetime
 
 from django.db.models import Count, Q
 from django.utils import timezone
-from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework import status, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from django.contrib.auth import authenticate
 
 from .models import Appointment, AppointmentReminder, AvailabilityException, AvailabilityRule, Clinic, Doctor, StaffUser
 from .serializers import (
@@ -127,3 +131,48 @@ class AppointmentReminderViewSet(viewsets.ModelViewSet):
         if appointment:
             qs = qs.filter(appointment_id=appointment)
         return qs
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register(request):
+    data = request.data
+    clinic_name = (data.get('clinic_name') or '').strip()
+    name = (data.get('name') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    username = (data.get('username') or email or '').strip().lower()
+    password = data.get('password') or ''
+    phone = (data.get('phone') or '').strip()
+    if not clinic_name or not username or not password:
+        return Response({'detail': 'clinic_name, username/email, and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if StaffUser.objects.filter(username=username).exists():
+        return Response({'detail': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+    clinic = Clinic.objects.create(name=clinic_name, phone=phone, reminder_hours=[24, 2])
+    user = StaffUser.objects.create_user(username=username, email=email, password=password, first_name=name, phone=phone, role='admin', clinic=clinic, is_staff=True)
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key, 'user': StaffUserSerializer(user).data, 'clinic': ClinicSerializer(clinic).data}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login(request):
+    username = (request.data.get('username') or request.data.get('email') or '').strip().lower()
+    password = request.data.get('password') or ''
+    user = authenticate(request, username=username, password=password)
+    if not user:
+        # try email lookup
+        try:
+            u = StaffUser.objects.get(email=username)
+            user = authenticate(request, username=u.username, password=password)
+        except StaffUser.DoesNotExist:
+            pass
+    if not user:
+        return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_400_BAD_REQUEST)
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key, 'user': StaffUserSerializer(user).data, 'clinic': ClinicSerializer(user.clinic).data if user.clinic else None})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me(request):
+    u = request.user
+    return Response({'user': StaffUserSerializer(u).data, 'clinic': ClinicSerializer(u.clinic).data if u.clinic else None})

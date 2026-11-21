@@ -9,7 +9,7 @@ const nav = [
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
-export function Layout() {
+export function Layout({ onLogout }: { onLogout: () => void }) {
   const { clinic } = useStore()
   return (
     <div className="min-h-screen bg-[#f5f7f2] text-[#18211b]">
@@ -24,6 +24,7 @@ export function Layout() {
               <Icon size={16} />{label}
             </NavLink>
           ))}
+          <button onClick={onLogout} className="shrink-0 rounded-xl bg-[#f7faf5] px-3 py-2 text-sm font-medium text-[#425349]">Sign out</button>
         </nav>
       </div>
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 md:px-6">
@@ -56,7 +57,8 @@ export function Layout() {
                 </NavLink>
               ))}
             </nav>
-            <div className="mt-8 rounded-2xl bg-[#f7faf5] p-4 text-xs text-[#5f6f65]">
+            <button onClick={onLogout} className="mt-6 w-full rounded-2xl border border-[#d7ddd1] px-3 py-2.5 text-sm font-medium text-[#425349] hover:bg-[#f7faf5]">Sign out</button>
+            <div className="mt-4 rounded-2xl bg-[#f7faf5] p-4 text-xs text-[#5f6f65]">
               <div className="font-medium text-[#223129]">SMS-first MVP</div>
               <p className="mt-1 leading-5">Track reminders, confirmations, and no-shows without replacing existing records.</p>
             </div>

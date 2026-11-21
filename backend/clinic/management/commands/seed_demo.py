@@ -19,8 +19,6 @@ class Command(BaseCommand):
             timezone='Africa/Nairobi', subscription_status='trial', sms_sender_id='CLINIC',
             reminder_hours=[24, 2], consent_text_version='v1',
         )
-        StaffUser.objects.create_user(username='admin', password='admin1234', email='admin@majiwa.test', role='admin', clinic=clinic, is_staff=True, is_superuser=True)
-        StaffUser.objects.create_user(username='reception', password='reception1234', email='reception@majiwa.test', role='receptionist', clinic=clinic)
 
         d1 = Doctor.objects.create(clinic=clinic, name='Dr. Amina Wanjiku', specialty='General Practice', phone='+254712000001')
         d2 = Doctor.objects.create(clinic=clinic, name='Dr. Brian Otieno', specialty='Pediatrics', phone='+254712000002')

@@ -9,6 +9,9 @@ from .views import (
     ClinicViewSet,
     DoctorViewSet,
     StaffUserViewSet,
+    login,
+    me,
+    register,
 )
 
 router = DefaultRouter()
@@ -21,5 +24,8 @@ router.register(r'appointments', AppointmentViewSet, basename='appointment')
 router.register(r'reminders', AppointmentReminderViewSet, basename='reminder')
 
 urlpatterns = [
+    path('auth/register/', register),
+    path('auth/login/', login),
+    path('auth/me/', me),
     path('', include(router.urls)),
 ]

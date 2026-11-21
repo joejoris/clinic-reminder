@@ -1,13 +1,29 @@
 import type { Appointment, AvailabilityRule, Clinic, Doctor } from '../types'
 
 const BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+const TOKEN_KEY = 'clinic-reminder-token'
+
+export const authToken = {
+  get: () => localStorage.getItem(TOKEN_KEY),
+  set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
+  clear: () => localStorage.removeItem(TOKEN_KEY),
+}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = authToken.get()
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Token ${token}` } : {}),
+      ...(init?.headers || {}),
+    },
     ...init,
   })
   if (!res.ok) {
+    if (res.status === 401) {
+      authToken.clear()
+      if (typeof window !== 'undefined') window.location.href = '/login'
+    }
     const text = await res.text()
     throw new Error(text || `Request failed: ${res.status}`)
   }
@@ -96,5 +112,14 @@ export const api = {
     if (patch.cancelReason !== undefined) body.cancel_reason = patch.cancelReason
     if (patch.consentCaptured !== undefined) { body.consent_captured_at = patch.consentCaptured ? new Date().toISOString() : null; body.consent_channel = patch.consentCaptured ? 'sms' : '' }
     return toAppt(await req(`/appointments/${id}/`, { method: 'PATCH', body: JSON.stringify(body) }))
+  },
+  async register(payload: { clinic_name: string; name: string; email: string; username: string; password: string; phone?: string }) {
+    return req<{ token: string; user: any; clinic: any }>('/auth/register/', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  async login(payload: { username: string; password: string }) {
+    return req<{ token: string; user: any; clinic: any }>('/auth/login/', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  async me() {
+    return req<{ user: any; clinic: any }>('/auth/me/')
   },
 }

@@ -10,6 +10,11 @@ vi.mock('./lib/api', async () => {
   let r = structuredClone(availabilityRules)
   let a = structuredClone(appointments)
   return {
+    authToken: {
+      get: () => localStorage.getItem('clinic-reminder-token'),
+      set: (t: string) => localStorage.setItem('clinic-reminder-token', t),
+      clear: () => localStorage.removeItem('clinic-reminder-token'),
+    },
     api: {
       getClinic: async () => c,
       updateClinic: async (_id: string, patch: any) => { c = { ...c, ...patch }; return c },
@@ -28,6 +33,7 @@ vi.mock('./lib/api', async () => {
 
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem('clinic-reminder-token', 'test-token')
 })
 
 afterEach(() => {

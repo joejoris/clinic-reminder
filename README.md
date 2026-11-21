@@ -30,7 +30,7 @@ python manage.py seed_demo
 python manage.py runserver 127.0.0.1:8000
 ```
 
-API runs at `http://127.0.0.1:8000/api/`. Admin at `http://127.0.0.1:8000/admin/` (demo: `admin` / `admin1234`).
+API runs at `http://127.0.0.1:8000/api/`. Admin at `http://127.0.0.1:8000/admin/`. Create an account from the frontend sign-up flow, or create a Django superuser with `python manage.py createsuperuser`.
 
 ## Notes
 
