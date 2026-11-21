@@ -1,39 +1,34 @@
-# Clinic Reminder
+# Clinic Reminder Frontend
 
-Monorepo for the Clinic Reminder MVP: a receptionist-first scheduling, SMS reminder, and no-show tracking app for small private Kenyan clinics.
+Receptionist-first clinic scheduling, SMS reminder, and no-show tracking frontend.
 
-## Structure
+## Stack
 
-- `frontend/` - Vite + React + TypeScript + Tailwind frontend
-- `backend/` - Django + Django REST Framework API (PostgreSQL-ready, SQLite fallback for local dev)
+- Vite + React + TypeScript
+- Tailwind CSS
+- React Router
+- Vitest + Testing Library
 
-## Frontend
+## Setup
 
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
 
-Runs at `http://127.0.0.1:5173/`.
+App runs at `http://127.0.0.1:5173/`.
 
-## Backend
+## Environment
 
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
-python manage.py migrate
-python manage.py seed_demo
-python manage.py runserver 127.0.0.1:8000
+Optional `.env`:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000/api
 ```
 
-API runs at `http://127.0.0.1:8000/api/`. Admin at `http://127.0.0.1:8000/admin/`. Create an account from the frontend sign-up flow, or create a Django superuser with `python manage.py createsuperuser`.
+## Scripts
 
-## Notes
-
-- Backend uses `DATABASE_URL`; defaults to SQLite if unset. Set PostgreSQL via `.env` for production-aligned storage.
-- Frontend API base defaults to `http://127.0.0.1:8000/api` (`VITE_API_URL` can override).
-- Demo data is seeded by `python manage.py seed_demo`.
+- `npm run dev` - start dev server
+- `npm run build` - production build
+- `npm test` - run smoke tests
+- `npm run lint` - run oxlint
